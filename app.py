@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from paddleocr import PaddleOCR
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 ocr = PaddleOCR(use_angle_cls=True, lang="korean")
@@ -35,6 +36,11 @@ async def http_exception_handler(_: Request, e: HTTPException):
 async def validation_exception_handler(_: Request, e: RequestValidationError):
     error_detail = e.errors()[0].get("msg", "Validation error")
     return response(400, error=error_detail)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def starlette_http_exception_handler(_: Request, e: StarletteHTTPException):
+    return response(e.status_code, error=e.detail)
 
 
 @app.exception_handler(Exception)
