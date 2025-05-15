@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from paddleocr import PaddleOCR
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 ocr = PaddleOCR(use_angle_cls=True, lang="korean")
 
 KST = timezone(timedelta(hours=9))
