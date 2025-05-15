@@ -1,18 +1,36 @@
+import os
 from datetime import datetime, timezone, timedelta
 
 import cv2
 import numpy as np
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from paddleocr import PaddleOCR
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 
-app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-ocr = PaddleOCR(use_angle_cls=True, lang="korean")
+load_dotenv()
 
 KST = timezone(timedelta(hours=9))
+
+VERIFICATION_KEY = os.getenv("VERIFICATION_KEY")
+
+ocr = PaddleOCR(use_angle_cls=True, lang="korean")
+
+
+class VerificationKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        key = request.headers.get("X-CLASSPICK-VERIFICATION-KEY")
+        if key != VERIFICATION_KEY:
+            return response(403, error="Invalid verification key")
+        return await call_next(request)
+
+
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+app.add_middleware(VerificationKeyMiddleware)
 
 
 def response(status_code: int, *, error: str = None, data=None):

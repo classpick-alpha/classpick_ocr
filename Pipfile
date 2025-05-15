@@ -11,6 +11,7 @@ paddlepaddle = "*"
 opencv-python-headless = "*"
 numpy = "*"
 python-multipart = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
